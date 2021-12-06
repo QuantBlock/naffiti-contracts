@@ -1,5 +1,6 @@
 import "@nomiclabs/hardhat-waffle";
 import "@openzeppelin/hardhat-upgrades";
+import "@nomiclabs/hardhat-etherscan";
 
 import { HardhatUserConfig } from "hardhat/types";
 
@@ -20,6 +21,9 @@ const config: HardhatUserConfig = {
         },
       },
     ],
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY,
   },
   networks: {
     mainnet: {

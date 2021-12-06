@@ -10,7 +10,7 @@ async function main() {
   const naffitiTokenAddress = NAFFITI[network.name];
 
   // Pool configs
-  const startBlock: number = 190000;
+  const startBlock: number = 9767000;
   const migrationBlock: number = 12336000;
   const endBlock: number = 12382500;
   const rewardPerBlock: BigNumber = expandTo18Decimals(10);
@@ -20,8 +20,14 @@ async function main() {
     deployer
   );
   console.log("Using deployer: ", deployer.address);
+  const migraterDelay = Math.floor(Duration.fromObject({ days: 7 }).as("seconds"))
+  console.log("Migrater Delay: ", migraterDelay)
   const stakingPools = await StakingPools.deploy(
-    Duration.fromObject({ days: 7 }).as("seconds") // _migratorSetterDelay
+    migraterDelay// _migratorSetterDelay
+    , {
+      gasPrice: 1_000_000_000,
+      gasLimit: 8_000_000,
+    }
   );
   console.log("StakingPools contract deployed to:", stakingPools.address);
   await stakingPools.deployed();
@@ -33,7 +39,10 @@ async function main() {
     endBlock, // endBlock
     migrationBlock, // migrationBlock
     rewardPerBlock // rewardPerBlock
-  );
+  ,{
+    gasPrice: 1_000_000_000,
+    gasLimit: 8_000_000,
+  });
   await txnReceipt.wait();
   console.log("All done");
 }

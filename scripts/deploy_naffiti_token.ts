@@ -7,7 +7,7 @@ async function main() {
   );
 
   const NaffitiToken = await ethers.getContractFactory("NaffitiToken", deployer);
-  const naffitiToken = await NaffitiToken.deploy();
+  const naffitiToken = await NaffitiToken.deploy(deployer.address);
   console.log("Naffiti Token is deployed to: ", naffitiToken.address);
 }
 

@@ -1,4 +1,4 @@
-import { ethers, network, upgrades } from "hardhat";
+import { ethers, network } from "hardhat";
 import { NAFFITI } from "./constant";
 
 async function main() {
@@ -6,16 +6,9 @@ async function main() {
   const naffitiTokenAddress = NAFFITI[network.name];
 
   const TokenEscrow = await ethers.getContractFactory("TokenEscrow", deployer);
-  const tokenEscrow = await upgrades.deployProxy(
-    TokenEscrow,
-    [
-      naffitiTokenAddress
-    ],
-    {
-      initializer: "__TokenEscrow_init"
-    }
-  );
+  const tokenEscrow = await TokenEscrow.deploy();
   await tokenEscrow.deployed();
+  await tokenEscrow.__TokenEscrow_init(naffitiTokenAddress);
   console.log("Token Escrow contract deployed to:", tokenEscrow.address);
 
   console.log("All done");

@@ -88,6 +88,7 @@ contract StakingPools is Ownable {
     }
 
     uint256 public lastPoolId; // The first pool has ID of 1
+    uint256 public lastStakeId; // The stake has ID of 1
 
     IStakingPoolMigrator public migrator;
     uint256 public migratorSetterDelay;
@@ -97,7 +98,7 @@ contract StakingPools is Ownable {
 
     mapping(uint256 => PoolInfo) public poolInfos;
     mapping(uint256 => PoolData) public poolData;
-    mapping(uint256 => mapping(address => UserData)) public userData;
+    mapping(uint256 => mapping(uint256 => UserData)) public userData;
 
     uint256 private constant ACCU_REWARD_MULTIPLIER = 10**20; // Precision loss prevention
 
@@ -123,8 +124,8 @@ contract StakingPools is Ownable {
         _;
     }
 
-    function getReward(uint256 poolId, address staker) external view returns (uint256) {
-        UserData memory currentUserData = userData[poolId][staker];
+    function getReward(uint256 poolId, uint256 stakeId) external view returns (uint256) {
+        UserData memory currentUserData = userData[poolId][stakeId];
         PoolInfo memory currentPoolInfo = poolInfos[poolId];
         PoolData memory currentPoolData = poolData[poolId];
 
@@ -282,42 +283,44 @@ contract StakingPools is Ownable {
     }
 
     function stake(uint256 poolId, uint256 amount) external onlyPoolExists(poolId) onlyPoolActive(poolId) {
-        _updatePoolAccuReward(poolId);
-        _updateStakerReward(poolId, msg.sender);
+        uint256 newStakeId = ++lastStakeId;
 
-        _stake(poolId, msg.sender, amount);
+        _updatePoolAccuReward(poolId);
+        _updateStakerReward(poolId, newStakeId, msg.sender);
+
+        _stake(poolId, newStakeId, msg.sender, amount);
     }
 
-    function unstake(uint256 poolId, uint256 amount) external onlyPoolExists(poolId) {
+    function unstake(uint256 poolId, uint256 stakeId, uint256 amount) external onlyPoolExists(poolId) {
         _updatePoolAccuReward(poolId);
-        _updateStakerReward(poolId, msg.sender);
+        _updateStakerReward(poolId, stakeId, msg.sender);
 
-        _unstake(poolId, msg.sender, amount);
+        _unstake(poolId, stakeId, msg.sender, amount);
     }
 
-    function emergencyUnstake(uint256 poolId) external onlyPoolExists(poolId) {
-        _unstake(poolId, msg.sender, userData[poolId][msg.sender].stakeAmount);
+    function emergencyUnstake(uint256 poolId, uint256 stakeId) external onlyPoolExists(poolId) {
+        _unstake(poolId, stakeId, msg.sender, userData[poolId][stakeId].stakeAmount);
 
         // Forfeit user rewards to avoid abuse
-        userData[poolId][msg.sender].pendingReward = 0;
+        userData[poolId][poolId].pendingReward = 0;
     }
 
-    function redeemRewards(uint256 poolId) external onlyPoolExists(poolId) {
-        redeemRewardsByAddress(poolId, msg.sender);
+    function redeemRewards(uint256 poolId, uint256 stakeId) external onlyPoolExists(poolId) {
+        redeemRewardsByAddress(poolId, stakeId, msg.sender);
     }
 
-    function redeemRewardsByAddress(uint256 poolId, address user) public onlyPoolExists(poolId) {
+    function redeemRewardsByAddress(uint256 poolId, uint256 stakeId, address user) public onlyPoolExists(poolId) {
         require(user != address(0), "StakingPools: zero address");
 
         _updatePoolAccuReward(poolId);
-        _updateStakerReward(poolId, user);
+        _updateStakerReward(poolId, stakeId, user);
 
         require(address(rewarder) != address(0), "StakingPools: rewarder not set");
 
-        uint256 rewardToRedeem = userData[poolId][user].pendingReward;
+        uint256 rewardToRedeem = userData[poolId][stakeId].pendingReward;
         require(rewardToRedeem > 0, "StakingPools: no reward to redeem");
 
-        userData[poolId][user].pendingReward = 0;
+        userData[poolId][stakeId].pendingReward = 0;
 
         rewarder.onReward(poolId, user, rewardToRedeem);
 
@@ -326,12 +329,13 @@ contract StakingPools is Ownable {
 
     function _stake(
         uint256 poolId,
+        uint256 newStakeId,
         address user,
         uint256 amount
     ) private {
         require(amount > 0, "StakingPools: cannot stake zero amount");
 
-        userData[poolId][user].stakeAmount = userData[poolId][user].stakeAmount.add(amount);
+        userData[poolId][newStakeId].stakeAmount = userData[poolId][newStakeId].stakeAmount.add(amount);
         poolData[poolId].totalStakeAmount = poolData[poolId].totalStakeAmount.add(amount);
 
         safeTransferFrom(poolInfos[poolId].poolToken, user, address(this), amount);
@@ -341,13 +345,14 @@ contract StakingPools is Ownable {
 
     function _unstake(
         uint256 poolId,
+        uint256 stakeId,
         address user,
         uint256 amount
     ) private {
         require(amount > 0, "StakingPools: cannot unstake zero amount");
 
         // No sufficiency check required as sub() will throw anyways
-        userData[poolId][user].stakeAmount = userData[poolId][user].stakeAmount.sub(amount);
+        userData[poolId][stakeId].stakeAmount = userData[poolId][stakeId].stakeAmount.sub(amount);
         poolData[poolId].totalStakeAmount = poolData[poolId].totalStakeAmount.sub(amount);
 
         safeTransfer(poolInfos[poolId].poolToken, user, amount);
@@ -376,8 +381,8 @@ contract StakingPools is Ownable {
         }
     }
 
-    function _updateStakerReward(uint256 poolId, address staker) private {
-        UserData storage currentUserData = userData[poolId][staker];
+    function _updateStakerReward(uint256 poolId, uint256 stakeId, address staker) private {
+        UserData storage currentUserData = userData[poolId][stakeId];
         PoolData storage currentPoolData = poolData[poolId];
 
         uint256 stakeAmount = currentUserData.stakeAmount;

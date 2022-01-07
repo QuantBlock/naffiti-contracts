@@ -13,7 +13,7 @@ export const NAFFITI = {
 export const REWARD_DISPATCHER = {
   mainnet: "",
   devchain: "",
-  rinkeby: "0xbfFdD61323C7666036D638D58c65d230c531A555"
+  rinkeby: "0x2E095a5b80848C52Ac8a1316E40aEf967BA46589"
 };
 
 export const STAKING_POOLS = {

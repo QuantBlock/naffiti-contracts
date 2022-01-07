@@ -3,7 +3,7 @@ pragma solidity ^0.7.6;
 
 import "./interfaces/IStakingPoolRewarder.sol";
 
-contract StakingPoolRewarder is IStakingPoolRewarder {
+contract DirectPayoutRewarder is IStakingPoolRewarder {
 
     address public stakingPool;
     address public rewardToken;

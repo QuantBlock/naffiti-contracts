@@ -1,6 +1,6 @@
 import { ethers, network } from "hardhat";
 import { BigNumber } from "@ethersproject/bignumber";
-import {NAFFITI, REWARD_DISPATCHER, STAKING_POOLS} from "./constant";
+import {NAFFITI, REWARD_DISPATCHER, STAKING_POOLS, uint256Max} from "./constant";
 import { Duration } from "luxon";
 
 import { expandTo18Decimals } from "../test/utilities";
@@ -40,7 +40,18 @@ async function main() {
   console.log("StakingPools at %s is setting rewarder to %s", stakingpoolAddress, directPayoutRewarderAddress);
   const setRewarderTx = await stakingPools.setRewarder(directPayoutRewarderAddress);
   await setRewarderTx.wait();
+
+  const NAOToken = await ethers.getContractFactory(
+      "NAOToken",
+      deployer
+  );
+
+  const naoToken = await NAOToken.attach(NAFFITI[network.name]);
+  await naoToken.connect(deployer).approve(directPayoutRewarderAddress, uint256Max);
+
   console.log("All Done");
+
+
 
 }
 

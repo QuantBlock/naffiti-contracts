@@ -1,3 +1,9 @@
+import {BigNumber} from "ethers";
+
+export const uint256Max: BigNumber = BigNumber.from(
+    "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+);
+
 export const NAFFITI = {
   mainnet: "",
   devchain: "0x90E4aA17f8Dd71BEb83485b084d276205a02b83C",

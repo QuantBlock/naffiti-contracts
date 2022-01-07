@@ -41,7 +41,10 @@ async function main() {
   const setRewarderTx = await stakingPools.setRewarder(directPayoutRewarderAddress);
   await setRewarderTx.wait();
 
+
   console.log("All Done");
+
+
 
 }
 

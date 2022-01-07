@@ -4,6 +4,18 @@ export const NAFFITI = {
   rinkeby: "0x4884927BA594998B6ac8E51E7FFA242408Fe1101"
 };
 
+export const REWARD_DISPATCHER = {
+  mainnet: "",
+  devchain: "",
+  rinkeby: "0xbfFdD61323C7666036D638D58c65d230c531A555"
+};
+
+export const STAKING_POOLS = {
+  mainnet: "",
+  devchain: "",
+  rinkeby: "0xA069a780e3A3033D98cAbf83594e117e7a6d9AB8"
+};
+
 export const TOKEN_ESCROW = {
   mainnet: "",
   devchain: "",

@@ -41,17 +41,7 @@ async function main() {
   const setRewarderTx = await stakingPools.setRewarder(directPayoutRewarderAddress);
   await setRewarderTx.wait();
 
-  const NAOToken = await ethers.getContractFactory(
-      "NAOToken",
-      deployer
-  );
-
-  const naoToken = await NAOToken.attach(NAFFITI[network.name]);
-  await naoToken.connect(deployer).approve(directPayoutRewarderAddress, uint256Max);
-
   console.log("All Done");
-
-
 
 }
 

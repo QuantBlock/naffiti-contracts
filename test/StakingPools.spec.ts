@@ -47,8 +47,8 @@ describe("StakingPools", function () {
   beforeEach(async function () {
     [deployer, alice, bob, charlie, david] = await ethers.getSigners();
 
-    const NaffitiToken = await ethers.getContractFactory(
-      "NaffitiToken"
+    const NAOToken = await ethers.getContractFactory(
+      "NAOToken"
     );
     const StakingPools = await ethers.getContractFactory("StakingPools");
     const MockStakingPoolMigrator = await ethers.getContractFactory(
@@ -58,11 +58,11 @@ describe("StakingPools", function () {
       "MockStakingPoolRewarder"
     );
 
-    // Using `NaffitiToken` contract as ERC20 mock
-    tokenA = await NaffitiToken.deploy(
+    // Using `NAOToken` contract as ERC20 mock
+    tokenA = await NAOToken.deploy(
       deployer.address // genesis_holder
     );
-    tokenB = await NaffitiToken.deploy(
+    tokenB = await NAOToken.deploy(
       deployer.address // genesis_holder
     );
 

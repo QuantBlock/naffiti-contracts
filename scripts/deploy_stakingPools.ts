@@ -10,7 +10,7 @@ async function main() {
   const naffitiTokenAddress = NAFFITI[network.name];
 
   // Pool configs
-  const startBlock: number = 9767000;
+  const startBlock: number = 9945000;
   const migrationBlock: number = 12336000;
   const endBlock: number = 12382500;
   const rewardPerBlock: BigNumber = expandTo18Decimals(10);

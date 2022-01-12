@@ -1,6 +1,6 @@
 import { ethers, network } from "hardhat";
 import { BigNumber } from "@ethersproject/bignumber";
-import { NAFFITI } from "./constant";
+import {NAFFITI, uint256Max} from "./constant";
 import { Duration } from "luxon";
 
 import { expandTo18Decimals } from "../test/utilities";
@@ -10,10 +10,10 @@ async function main() {
   const naffitiTokenAddress = NAFFITI[network.name];
 
   // Pool configs
-  const startBlock: number = 9945000;
-  const migrationBlock: number = 12336000;
-  const endBlock: number = 12382500;
-  const rewardPerBlock: BigNumber = expandTo18Decimals(10);
+  const startBlock: number = 13989754;
+  const migrationBlock: number = 13989755;
+  const endBlock: BigNumber = uint256Max;
+  const rewardPerBlock: BigNumber = expandTo18Decimals(9000000);
 
   const StakingPools = await ethers.getContractFactory(
     "StakingPools",
@@ -24,10 +24,6 @@ async function main() {
   console.log("Migrater Delay: ", migraterDelay)
   const stakingPools = await StakingPools.deploy(
     migraterDelay// _migratorSetterDelay
-    , {
-      gasPrice: 1_000_000_000,
-      gasLimit: 8_000_000,
-    }
   );
   console.log("StakingPools contract deployed to:", stakingPools.address);
   await stakingPools.deployed();
@@ -39,10 +35,7 @@ async function main() {
     endBlock, // endBlock
     migrationBlock, // migrationBlock
     rewardPerBlock // rewardPerBlock
-  ,{
-    gasPrice: 1_000_000_000,
-    gasLimit: 8_000_000,
-  });
+  );
   await txnReceipt.wait();
   console.log("All done");
 }
